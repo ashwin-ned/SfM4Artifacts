@@ -1,1 +1,0 @@
-# SfM4Artifacts
