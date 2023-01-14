@@ -1,9 +1,6 @@
 
-## AI LAB: Computer Vision & NLP Final Project Submission
-## Topic: 3D Reconstruction of Roman Artifacts using SfM
+## AI LAB: Computer Vision & NLP Final Project: 3D Reconstruction of Roman Artifacts using SfM
 ## Author: Ashwin Nedungadi
-## Date: 02/07/2022
-## Email: ashwin.nedungadi@tu-dortmund.de
 
 
 # Running the code
