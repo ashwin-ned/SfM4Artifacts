@@ -3,9 +3,12 @@
 ## Author: Ashwin Nedungadi
 
 ## Example Reconstructions of Roman Artifacts
+
 <img src="https://github.com/ashwin-ned/SfM4Artifacts/blob/main/reconstructed_examples/caracalla.PNG" width="300"/> <img src="https://github.com/ashwin-ned/SfM4Artifacts/blob/main/reconstructed_examples/she_wolf.PNG" width="361"/>
 
 <img src="https://github.com/ashwin-ned/SfM4Artifacts/blob/main/reconstructed_examples/thornboy2.PNG" width="361"/> <img src="https://github.com/ashwin-ned/SfM4Artifacts/blob/main/reconstructed_examples/commodus2.PNG" width="300"/>
+<caption>Bust of Caracalla (upper-left); Capitoline Wolf (upper-right); Lo Spinario (lower-left); Bust of Commodus (lower-right).
+<br> Capitolini Museum Collections, Rome.</caption>
 
 # Running the code
 
