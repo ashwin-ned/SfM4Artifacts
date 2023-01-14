@@ -1,12 +1,10 @@
 
 ### AI LAB: Computer Vision & NLP Final Project: 3D Reconstruction of Roman Artifacts using SfM
 ## Author: Ashwin Nedungadi
-![Caracalla](https://github.com/ashwin-ned/SfM4Artifacts/blob/main/reconstructed_examples/caracalla.PNG) 
-[comment]: <> (![ThornBoy](https://github.com/ashwin-ned/SfM4Artifacts/blob/main/reconstructed_examples/thornboy2.PNG))
-[comment]: <> (![Greek](https://github.com/ashwin-ned/SfM4Artifacts/blob/main/reconstructed_examples/greek_mesh.PNG))  
-![SheWolf](https://github.com/ashwin-ned/SfM4Artifacts/blob/main/reconstructed_examples/she_wolf.PNG)
 
+<img src="https://github.com/ashwin-ned/SfM4Artifacts/blob/main/reconstructed_examples/caracalla.PNG" width="300"/> <img src="https://github.com/ashwin-ned/SfM4Artifacts/blob/main/reconstructed_examples/she_wolf.PNG" width="361"/>
 
+<img src="https://github.com/ashwin-ned/SfM4Artifacts/blob/main/reconstructed_examples/thornboy2.PNG" width="361"/> <img src="https://github.com/ashwin-ned/SfM4Artifacts/blob/main/reconstructed_examples/commodus2.PNG" width="300"/>
 
 # Running the code
 
