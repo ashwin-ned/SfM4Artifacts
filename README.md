@@ -42,3 +42,6 @@ In the multi_view_SfM folder there are scripts for performing incermental Multi-
 
 The output will be saved as an "output.ply" file. This can be changed in the last section of the script.
 The final pointcloud is obtained by performing two_view_SfM on all the image pairs and then aligning and stitching the results since the two_view_SfM algorithm only results in partial pointclouds.
+
+# Contact
+If you would like to collaborate with me please send me an email at ashwinnedungadi007@gmail.com 
