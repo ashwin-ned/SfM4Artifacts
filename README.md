@@ -11,11 +11,13 @@
 <br> Capitolini Museum Collections, Rome.</caption>
 
 # Running the code
-
-For a simple two view reconstruction use the two_view_SfM.m script. 
+## MATLAB Version
+For a simple two view reconstruction using MATLAB use the two_view_SfM.m script. 
 Make sure that the camera parameter files are in the same directory oneplus_cameraParameters.mat and oneplus_estimationErrors.mat
 Make sure that the directory for the input images are set correctly and exists. 
-
+## Python Version 
+run python pipeline.py
+The dense reconstruction and texturing can be done using OpenMVS or COLMAP.  
 # Camera Calibration Data
 
 The camera calibration parameters are already provided with the code. The camera used was a mobile camera of a oneplus 6 with 12 MP and 25mm focal length. 
