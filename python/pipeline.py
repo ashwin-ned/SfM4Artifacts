@@ -5,7 +5,6 @@ import open3d
 
 
 
-
 def dataloader(path):
     images = list()
     for filename in os.listdir(path):
@@ -25,10 +24,12 @@ def dataloader(path):
 
 if __name__ ==  "__main__":
     # Load Data
-    images = dataloader('C:/Users/Ashwin/Desktop/SfM Project/Sfm4Artifacts/datasets/laocoon/')
+    images = 'C:/Users/Ashwin/Desktop/SfM Project/Sfm4Artifacts/datasets/laocoon/'
+    output = 'C:/Users/Ashwin/Desktop/SfM Project/Sfm4Artifacts/outputs/'
 
     # Run the preprocessing pipeline
 
-    # Run the Reconstruction Pipeline 
+    # Run the COLMAP Reconstruction Pipeline 
 
-    # Visualize the results
+    # Extract Features
+  
