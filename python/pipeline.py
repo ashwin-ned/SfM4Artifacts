@@ -4,7 +4,6 @@ import cv2
 import open3d
 
 
-
 def dataloader(path):
     images = list()
     for filename in os.listdir(path):

@@ -1,13 +1,12 @@
 import numpy as np 
 import cv2 
-import argparse
 import pickle
 import os 
 from time import time
 import matplotlib.pyplot as plt
 
 from utils import * 
-import pdb 
+
 
 class Camera(object): 
     def __init__(self, R, t, ref): 
@@ -27,44 +26,44 @@ class SFM(object):
         self.opts = opts
         self.point_cloud = np.zeros((0,3))
 
-        #setting up directory stuff..
-        # TODO Windows having issues, switch to linux
-        self.images_dir = os.path.join(opts.data_dir, opts.dataset)
-        self.feat_dir = "C:/Users/Ashwin/Desktop/SfM Project/SfM4Artifacts/datasets/laocoon/features/SIFT/"
-        self.matches_dir = "C:/Users/Ashwin/Desktop/SfM Project/SfM4Artifacts/datasets/laocoon/matches/BFMatcher/"
-        self.out_cloud_dir = "C:/Users/Ashwin/Desktop/SfM Project/SfM4Artifacts/datasets/laocoon/fountain-P11/point-clouds/"
-        self.out_err_dir = "C:/Users/Ashwin/Desktop/SfM Project/SfM4Artifacts/datasets/laocoon/fountain-P11/errors/"
-        # OLD
-        #self.images_dir = 'C:/Users/Ashwin/Desktop/SfM Project/Sfm4Artifacts/datasets/laocoon/'
-        #self.feat_dir = os.path.join(opts.data_dir, opts.dataset, 'features', opts.features)
-        #self.matches_dir = os.path.join(opts.data_dir, opts.dataset, 'matches', opts.matcher)
-        #self.out_cloud_dir = os.path.join(opts.out_dir, opts.dataset, 'point-clouds')
-        #self.out_err_dir = os.path.join(opts.out_dir, opts.dataset, 'errors')
+        self.images_dir = opts['images_dir']
+        self.feat_dir = opts['feat_dir']
+        self.matches_dir = opts['matches_dir']
+        self.out_cloud_dir = opts['out_cloud_dir']
+        self.out_err_dir = opts['out_err_dir']
+        self.plot_error = opts['plot_error']
+        self.matcher = opts['matcher']
+        self.cross_check = opts['cross_check']
+        self.pnp_prob = opts['pnp_prob']
+        self.pnp_method = opts['pnp_method']
+        self.reprojection_thres = opts['reprojection_thres']
 
         #output directories
         if not os.path.exists(self.out_cloud_dir): 
             os.makedirs(self.out_cloud_dir)
 
-        if (opts.plot_error is True) and (not os.path.exists(self.out_err_dir)): 
+        if (self.plot_error is True) and (not os.path.exists(self.out_err_dir)): 
             os.makedirs(self.out_err_dir)
 
-        #self.image_names = [x.split('.')[0] for x in sorted(os.listdir(self.images_dir)) \
-                            #if x.split('.')[-1] in opts.ext]
-        self.image_names = [x.split('.')[0] for x in sorted(os.listdir(self.images_dir))]
-        self.image_names.pop()
+        self.image_names = [x.split('.')[0] for x in sorted(os.listdir(self.images_dir)) if (x.endswith('.jpg') or x.endswith('.png'))]
         print(self.image_names)
 
         #setting up shared parameters for the pipeline
         self.image_data, self.matches_data, errors = {}, {}, {}
-        self.matcher = getattr(cv2, opts.matcher)(crossCheck=opts.cross_check)
 
-        if opts.calibration_mat == 'benchmark': 
+        if self.opts['matcher'] == 'BFMatcher':
+            self.matcher = cv2.BFMatcher_create()
+        elif self.opts['matcher'] == 'FlannBasedMatcher':
+            self.matcher = cv2.FlannBasedMatcher_create()
+
+        if opts['calibration_mat'] == 'default': 
             self.K = np.array([[2759.48,0,1520.69],[0,2764.16,1006.81],[0,0,1]])
-        elif opts.calibration_mat == 'lg_g3': 
-            self.K = np.array([[3.97*320, 0, 320],[0, 3.97*320, 240],[0,0,1]])
+        elif opts['calibration_mat'] is not None:
+           self.K = opts['calibration_mat']
         else: 
             raise NotImplementedError
-    # Loading files done oldschool way rewrite in python3
+        
+    # Loading files rewrite 
     def _LoadFeatures(self, name): 
         print(f"opening file {(self.feat_dir,'kp_{}.pkl'.format(name))}")
         #with open(os.path.join(self.feat_dir,'kp_{}.pkl'.format(name)),'r') as f:
@@ -110,9 +109,7 @@ class SFM(object):
 
         img1pts, img2pts, img1idx, img2idx = self._GetAlignedMatches(kp1,desc1,kp2,
                                                                     desc2,matches)
-        
-        #F,mask = cv2.findFundamentalMat(img1pts, img2pts, method=opts.fund_method,
-                                        #param1=opts.outlier_thres, param2=opts.fund_prob)
+ 
         F, mask = cv2.findFundamentalMat(img1pts, img2pts, method=cv2.FM_RANSAC)
         mask = mask.astype(bool).flatten()
 
@@ -182,9 +179,6 @@ class SFM(object):
                     img1pts, img2pts, img1idx, img2idx = self._GetAlignedMatches(kp1,desc1,kp2,
                                                                                 desc2,matches)
                     
-                    #F,mask = cv2.findFundamentalMat(img1pts,img2pts,method=opts.fund_method,
-                                                    #param1=opts.outlier_thres,
-                                                    #param2=opts.fund_prob)
                     F, mask = cv2.findFundamentalMat(img1pts, img2pts, method=cv2.FM_RANSAC)
                     mask = mask.astype(bool).flatten()
 
@@ -197,9 +191,15 @@ class SFM(object):
         
     def _NewViewPoseEstimation(self, name): 
         
-        def _Find2D3DMatches(): 
+        def _Find2D3DMatches():
             
-            matcher_temp = getattr(cv2, opts.matcher)()
+            if self.matcher == "BFMatcher": 
+                matcher_temp = cv2.BFMatcher_create()
+            elif self.matcher == "FlannBasedMatcher":
+                matcher_temp = cv2.FlannBasedMatcher()
+            else:
+                matcher_temp = cv2.BFMatcher_create()
+
             kps, descs = [], []
             for n in self.image_names: 
                 if n in self.image_data.keys():
@@ -207,7 +207,7 @@ class SFM(object):
 
                     kps.append(kp)
                     descs.append(desc)
-            
+
             matcher_temp.add(descs)
             matcher_temp.train()
 
@@ -258,8 +258,8 @@ class SFM(object):
 
         pts3d, pts2d, ref_len = _Find2D3DMatches()
         _, R, t, _ = cv2.solvePnPRansac(pts3d[:,np.newaxis],pts2d[:,np.newaxis],self.K,None,
-                            confidence=self.opts.pnp_prob,flags=getattr(cv2,self.opts.pnp_method),
-                            reprojectionError=self.opts.reprojection_thres)
+                            confidence=self.pnp_prob,flags=getattr(cv2,self.pnp_method),
+                            reprojectionError=self.reprojection_thres)
         R,_=cv2.Rodrigues(R)
         self.image_data[name] = [R,t,np.ones((ref_len,))*-1]
 
@@ -299,7 +299,7 @@ class SFM(object):
         
         err = np.mean(np.sqrt(np.sum((img_pts-reproj_pts)**2,axis=-1)))
 
-        if self.opts.plot_error: 
+        if self.plot_error: 
             fig,ax = plt.subplots()
             image = cv2.imread(os.path.join(self.images_dir, name+'.jpg'))[:,:,::-1]
             ax = DrawCorrespondences(image, img_pts, reproj_pts, ax)
@@ -371,67 +371,29 @@ class SFM(object):
 
         mean_error = sum(errors) / float(len(errors))
         print('Reconstruction Completed: Mean Reprojection Error = {2} [t={0:.6}s], \
-                Results stored in {1}'.format(total_time, self.opts.out_dir, mean_error))
+                Results stored in {1}'.format(total_time, self.out_cloud_dir, mean_error))
         
 
-def SetArguments(parser): 
-
-    #directory stuff
-    parser.add_argument('--data_dir',action='store',type=str,default='../data/',dest='data_dir',
-                        help='root directory containing input data (default: ../data/)') 
-    parser.add_argument('--dataset',action='store',type=str,default='fountain-P11',dest='dataset',
-                        help='name of dataset (default: fountain-P11)') 
-    parser.add_argument('--ext',action='store',type=str,default='jpg,png',dest='ext', 
-                        help='comma seperated string of allowed image extensions \
-                        (default: jpg,png)') 
-    parser.add_argument('--out_dir',action='store',type=str,default='../results/',dest='out_dir',
-                        help='root directory to store results in (default: ../results/)') 
-
-    #matching parameters
-    parser.add_argument('--features',action='store',type=str,default='SURF',dest='features',
-                        help='[SIFT|SURF] Feature algorithm to use (default: SURF)')
-    parser.add_argument('--matcher',action='store',type=str,default='BFMatcher',dest='matcher',
-                        help='[BFMatcher|FlannBasedMatcher] Matching algorithm to use \
-                        (default: BFMatcher)') 
-    parser.add_argument('--cross_check',action='store',type=bool,default=True,dest='cross_check',
-                        help='[True|False] Whether to cross check feature matching or not \
-                        (default: True)') 
-
-    #epipolar geometry parameters
-    parser.add_argument('--calibration_mat',action='store',type=str,default='benchmark',
-                        dest='calibration_mat',help='[benchmark|lg_g3] type of intrinsic camera \
-                        to use (default: benchmark)')
-    parser.add_argument('--fund_method',action='store',type=str,default='FM_RANSAC',
-                        dest='fund_method',help='method to estimate fundamental matrix \
-                        (default: FM_RANSAC)')
-    parser.add_argument('--outlier_thres',action='store',type=float,default=.9,
-                        dest='outlier_thres',help='threhold value of outlier to be used in\
-                         fundamental matrix estimation (default: 0.9)')
-    parser.add_argument('--fund_prob',action='store',type=float,default=.9,dest='fund_prob',
-                        help='confidence in fundamental matrix estimation required (default: 0.9)')
-    
-    #PnP parameters
-    parser.add_argument('--pnp_method',action='store',type=str,default='SOLVEPNP_DLS',
-                        dest='pnp_method',help='[SOLVEPNP_DLS|SOLVEPNP_EPNP|..] method used for\
-                        PnP estimation, see OpenCV doc for more options (default: SOLVEPNP_DLS')
-    parser.add_argument('--pnp_prob',action='store',type=float,default=.99,dest='pnp_prob',
-                        help='confidence in PnP estimation required (default: 0.99)')
-    parser.add_argument('--reprojection_thres',action='store',type=float,default=8.,
-                        dest='reprojection_thres',help='reprojection threshold in PnP estimation \
-                        (default: 8.)')
-
-    #misc
-    parser.add_argument('--plot_error',action='store',type=bool,default=False,dest='plot_error')
-
-def PostprocessArgs(opts): 
-    opts.fund_method = getattr(cv2,opts.fund_method)
-    opts.ext = opts.ext.split(',')
-
 if __name__=='__main__': 
-    parser = argparse.ArgumentParser()
-    SetArguments(parser)
-    opts = parser.parse_args()
-    PostprocessArgs(opts)
+
+    images_dir = "C:/Users/Ashwin/Desktop/SfM Project/SfM4Artifacts/datasets/boy_with_thorn/"
+    feat_dir = "C:/Users/Ashwin/Desktop/SfM Project/SfM4Artifacts/datasets/boy_with_thorn/outputs/features/SIFT/"
+    matches_dir = "C:/Users/Ashwin/Desktop/SfM Project/SfM4Artifacts/datasets/boy_with_thorn/outputs/matches/FlannBasedMatcher/"
+    out_cloud_dir = "C:/Users/Ashwin/Desktop/SfM Project/SfM4Artifacts/datasets/boy_with_thorn/output_pcd/point-clouds/"
+    out_err_dir = "C:/Users/Ashwin/Desktop/SfM Project/SfM4Artifacts/datasets/boy_with_thorn/output_pcd/errors/"
+    plot_error = True
+    cross_check = False
+    matcher = 'FlannBasedMatcher'
+    calibration_mat = 'default'
+
+    pnp_prob = 0.80
+    pnp_method = 'SOLVEPNP_ITERATIVE'
+    reprojection_thres = 8.0
+
+    opts = dict({'images_dir':images_dir, 'feat_dir':feat_dir, 'matches_dir':matches_dir, 
+                 'out_cloud_dir':out_cloud_dir, 'out_err_dir':out_err_dir, 'plot_error':plot_error,
+                   'cross_check':cross_check, 'matcher':matcher, 'calibration_mat':calibration_mat, 'pnp_prob':pnp_prob,
+                     'pnp_method':pnp_method, 'reprojection_thres':reprojection_thres})
     
     sfm = SFM(opts)
     sfm.Run()
