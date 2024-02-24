@@ -1,6 +1,7 @@
 
-### AI LAB: Computer Vision & NLP Final Project: 3D Reconstruction of Roman Artifacts using SfM
-## Author: Ashwin Nedungadi
+### SfM4Artifacts
+## Description
+I love history. During my ERASMUS in Sapienza University, Italy, I had the opportunity to take a class in classical archeology and computer vision simultaneously. Born out of the passion for archelogy and computer vision, SfM4Artifacts introduces a way to reconstruct 3D models of artifacts using images taken from a cellphone. 
 
 ## Example Reconstructions of Roman Artifacts
 
@@ -46,4 +47,4 @@ The output will be saved as an "output.ply" file. This can be changed in the las
 The final pointcloud is obtained by performing two_view_SfM on all the image pairs and then aligning and stitching the results since the two_view_SfM algorithm only results in partial pointclouds.
 
 # Contact
-If you would like to collaborate with me please send me an email at ashwinnedungadi007@gmail.com 
+If you are a museum or art gallery would like to collaborate with me to digitize your exhibits for free, please send me an email at ashwinnedungadi007@gmail.com 
