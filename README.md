@@ -1,7 +1,7 @@
 
 ### SfM4Artifacts
 ## Description
-I love history. During my ERASMUS semester at Sapienza University, Italy, I had the opportunity to take a classes in classical archeology and computer vision simultaneously. Born out of the passion for archelogy and computer vision, SfM4Artifacts introduces a way to reconstruct 3D models of artifacts using images taken from a cellphone. 
+I love history. During my ERASMUS semester at Sapienza University, Italy, I had the opportunity to take classes in classical archeology and computer vision simultaneously. Born out of the passion for archelogy and computer vision, SfM4Artifacts introduces a way to reconstruct 3D models of artifacts using images taken from a mobile device. 
 
 ## Example Reconstructions of Roman Artifacts
 
