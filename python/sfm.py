@@ -4,7 +4,6 @@ import pickle
 import os 
 from time import time
 import matplotlib.pyplot as plt
-
 from utils import * 
 
 
@@ -36,7 +35,7 @@ class SFM(object):
         self.cross_check = opts['cross_check']
         self.pnp_prob = opts['pnp_prob']
         self.pnp_method = opts['pnp_method']
-        self.reprojection_thres = opts['reprojection_thres']
+        self.reprojection_thresh = opts['reprojection_thresh']
 
         #output directories
         if not os.path.exists(self.out_cloud_dir): 
@@ -57,7 +56,9 @@ class SFM(object):
             self.matcher = cv2.FlannBasedMatcher_create()
 
         if opts['calibration_mat'] == 'default': 
-            self.K = np.array([[2759.48,0,1520.69],[0,2764.16,1006.81],[0,0,1]])
+            # Oneplus6 Fx = 3.6090e+03,  Fy = 3.5870e+03
+            # Oneplus6 Cx = 2.3160e+03, Cy = 1.7493e+03
+            self.K = np.array([[3609.0, 0, 2316.0],[0, 3587.0, 1749.3],[0, 0, 1]])
         elif opts['calibration_mat'] is not None:
            self.K = opts['calibration_mat']
         else: 
@@ -66,20 +67,18 @@ class SFM(object):
     # Loading files rewrite 
     def _LoadFeatures(self, name): 
         print(f"opening file {(self.feat_dir,'kp_{}.pkl'.format(name))}")
-        #with open(os.path.join(self.feat_dir,'kp_{}.pkl'.format(name)),'r') as f:
+
 
         f = open(os.path.join(self.feat_dir,'kp_{}.pkl'.format(name)),'rb')    
         kp = pickle.load(f)
         kp = DeserializeKeypoints(kp)
 
-        #with open(os.path.join(self.feat_dir,'desc_{}.pkl'.format(name)),'r') as f: 
         fd = open(os.path.join(self.feat_dir,'desc_{}.pkl'.format(name)),'rb')
         desc = pickle.load(fd)
 
         return kp, desc 
 
     def _LoadMatches(self, name1, name2): 
-        #with open(os.path.join(self.matches_dir,'match_{}_{}.pkl'.format(name1,name2)) ,'r') as f: 
         fm = open(os.path.join(self.matches_dir,'match_{}_{}.pkl'.format(name1,name2)) ,'rb')
         matches = pickle.load(fm)
         matches = DeserializeMatches(matches)
@@ -259,7 +258,7 @@ class SFM(object):
         pts3d, pts2d, ref_len = _Find2D3DMatches()
         _, R, t, _ = cv2.solvePnPRansac(pts3d[:,np.newaxis],pts2d[:,np.newaxis],self.K,None,
                             confidence=self.pnp_prob,flags=getattr(cv2,self.pnp_method),
-                            reprojectionError=self.reprojection_thres)
+                            reprojectionError=self.reprojection_thresh)
         R,_=cv2.Rodrigues(R)
         self.image_data[name] = [R,t,np.ones((ref_len,))*-1]
 
@@ -375,7 +374,7 @@ class SFM(object):
         
 
 if __name__=='__main__': 
-
+    # Example usage
     images_dir = "C:/Users/Ashwin/Desktop/SfM Project/SfM4Artifacts/datasets/boy_with_thorn/"
     feat_dir = "C:/Users/Ashwin/Desktop/SfM Project/SfM4Artifacts/datasets/boy_with_thorn/outputs/features/SIFT/"
     matches_dir = "C:/Users/Ashwin/Desktop/SfM Project/SfM4Artifacts/datasets/boy_with_thorn/outputs/matches/FlannBasedMatcher/"
@@ -388,12 +387,12 @@ if __name__=='__main__':
 
     pnp_prob = 0.80
     pnp_method = 'SOLVEPNP_ITERATIVE'
-    reprojection_thres = 8.0
+    reprojection_thresh = 8.0
 
     opts = dict({'images_dir':images_dir, 'feat_dir':feat_dir, 'matches_dir':matches_dir, 
                  'out_cloud_dir':out_cloud_dir, 'out_err_dir':out_err_dir, 'plot_error':plot_error,
                    'cross_check':cross_check, 'matcher':matcher, 'calibration_mat':calibration_mat, 'pnp_prob':pnp_prob,
-                     'pnp_method':pnp_method, 'reprojection_thres':reprojection_thres})
+                     'pnp_method':pnp_method, 'reprojection_thresh':reprojection_thresh})
     
     sfm = SFM(opts)
     sfm.Run()

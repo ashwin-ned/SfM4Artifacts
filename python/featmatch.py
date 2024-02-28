@@ -3,7 +3,6 @@ import numpy as np
 import pickle 
 import os 
 from time import time
-
 from utils import * 
 
 class FeatMatch:
@@ -34,7 +33,7 @@ class FeatMatch:
             img = cv2.imread(img_path)
             img_name = self.img_names[i].split('.')[0]
             img = img[:,:,::-1]
-
+            # TODO: Change Feature Matcher and move to separate class
             feat = getattr(cv2.xfeatures2d, '{}_create'.format(self.opts['features']))()
             kp, desc = feat.detectAndCompute(img,None)
             self.data.append((img_name, kp, desc))
@@ -89,8 +88,7 @@ class FeatMatch:
                 self.t1 = time()
 
 if __name__=='__main__': 
-
-   
+    # Example usage
     data_dir = 'C:/Users/Ashwin/Desktop/SfM Project/Sfm4Artifacts/datasets/boy_with_thorn/'
     data_files = [os.path.join(data_dir, f) for f in os.listdir(data_dir) if f.endswith('.jpg') or f.endswith('.png')]
     out_dir = 'C:/Users/Ashwin/Desktop/SfM Project/Sfm4Artifacts/datasets/boy_with_thorn/outputs/'
